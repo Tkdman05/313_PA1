@@ -137,32 +137,42 @@ int main (int argc, char *argv[]) {
 		char* buf2 = new char[len];
 		memcpy(buf2, &fm, sizeof(filemsg));
 		strcpy(buf2 + sizeof(filemsg), filename.c_str());
-		chan.cwrite(buf2, len);
+		chan.cwrite(buf2, len);	// I want the file length;
 
 		int64_t filesize = 0;
 		chan.cread(&filesize, sizeof(int64_t));
 
-		string outpath = "received/" + filename;
-    	ofstream outfile(outpath, ios::binary);
+		// open output file in directory
+		string op = "received/" + filename;
+    	ofstream outfile(op, ios::binary);
     	if (!outfile.is_open()) {
-     	   cerr << "Could not open output file: " << outpath << endl;
+     	   cerr << "Could not open output file: " << op << endl;
         	exit(1);
     	}
 
-		char* buf3 = new char[m];
+		char* buf3 = new char[m];	// create buffer of size buff capacity (m)
 
 		int64_t offset = 0;
+
+		// Loop over the segments in the file filesize / buff capacity
 		while (offset < filesize) {
     		int64_t chunk = min((int64_t)m, filesize - offset);
 
+			// create filemsg instance
         	filemsg* file_req = (filemsg*)buf2;
-        	file_req->offset = offset;
-        	file_req->length = chunk;
+        	file_req->offset = offset;	// set offset in the file
+        	file_req->length = chunk;	// set the length. Be careful of the last segment
 
+			// send the request (buf2)
 			chan.cwrite(buf2, len);
+
+			// receive the response
+        	// cread into buf3 length file_req->len
         	chan.cread(buf3, chunk);
 
+			// write buf3 into file: received/filename
 			outfile.write(buf3, chunk);
+			
         	offset += chunk;
 		}
 
