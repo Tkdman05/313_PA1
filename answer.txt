@@ -1,0 +1,11 @@
+Filesize | Execution Time
+---------|------
+1MB      | 0m0.818s
+10MB     | 0m3.986s
+100MB    | 0m18.042s
+500MB    | 4m29.709s
+
+After attempting the transfer of 1, 10, 100, and 500MB files, I observed the execution time 
+to be increasing with the size of the file. This is undoubtably due to the size of the buffer,
+as the larger the file, the more chunks the server and client must pass through, meaning more
+requests and responses as size increases.
